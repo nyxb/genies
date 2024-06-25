@@ -4,7 +4,7 @@ import fg from 'fast-glob'
 import fs, { pathExists } from 'fs-extra'
 import { loadConfig } from 'tsconfig-paths'
 import { getConfig } from '~/src/utils/get-config'
-import type { Config } from '~/src/utils/get-config'
+import type { RawConfig } from '~/src/utils/get-config'
 
 // TODO: Add support for more frameworks.
 // We'll start with Next.js for now.
@@ -65,7 +65,7 @@ export async function getTsConfig() {
    }
 }
 
-export async function getProjectConfig(cwd: string): Promise<Config | null> {
+export async function getProjectConfig(cwd: string): Promise<RawConfig | null> {
    // Check for existing component config.
    const existingConfig = await getConfig(cwd)
    if (existingConfig)
@@ -85,7 +85,7 @@ export async function getProjectConfig(cwd: string): Promise<Config | null> {
       .filter(dirent => dirent.isDirectory())
       .map(dirent => dirent.name)
 
-   const config: Config = {
+   const config: RawConfig = {
       componentsPath,
       style: 'kebab-case',
       tsx: isTsx,

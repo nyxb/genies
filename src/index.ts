@@ -11,8 +11,8 @@ async function main() {
    const packageInfo = await getPackageInfo()
 
    const program = new Command()
-      .name('nyxbui')
-      .description('Manage nyxbui components and dependencies to your project')
+      .name('genies')
+      .description('Add React components to your apps')
       .version(
          packageInfo.version || '1.0.0',
          '-v, --version',

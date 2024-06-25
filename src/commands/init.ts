@@ -46,30 +46,29 @@ export const init = new Command()
          }
 
          const projectConfig = await getProjectConfig(cwd)
+         let config
          if (projectConfig) {
-            const config = await promptForMinimalConfig(
+            config = await promptForMinimalConfig(
                cwd,
                projectConfig,
                opts.defaults,
             )
-            await runInit(cwd, config)
-         }
-         else {
+         } else {
             // Read config.
             const existingConfig = await getConfig(cwd)
-            const config = await promptForConfig(cwd, existingConfig, options.yes)
-            await runInit(cwd, config)
+            config = await promptForConfig(cwd, existingConfig, options.yes)
          }
+
+         await runInit(cwd, config)
 
          logger.info('')
          logger.info(
-        `${chalk.green(
-          'Success!',
-        )} Project initialization completed. You may now add components.`,
+            `${chalk.green(
+               'Success!',
+            )} Project initialization completed. You may now add components.`,
          )
          logger.info('')
-      }
-      catch (error) {
+      } catch (error) {
          handleError(error)
       }
    })
@@ -112,11 +111,26 @@ export async function promptForConfig(
       },
    ])
 
+   let fileExtension = 'tsx'
+   if (!options.tsx) {
+      const { extension } = await prompts({
+         type: 'select',
+         name: 'extension',
+         message: 'Which file extension do you prefer for JavaScript files?',
+         choices: [
+            { title: 'js', value: 'js' },
+            { title: 'jsx', value: 'jsx' },
+         ],
+      })
+      fileExtension = extension
+   }
+
    const config = rawConfigSchema.parse({
       style: options.style,
       componentsPath: options.componentsPath,
       tsx: options.tsx,
       aliases: options.aliases,
+      fileExtension,
    })
 
    if (!skip) {
@@ -124,7 +138,7 @@ export async function promptForConfig(
          type: 'confirm',
          name: 'proceed',
          message: `Write configuration to ${highlight(
-        'genies.config.ts'
+        `genies.config.${fileExtension === 'tsx' ? 'ts' : 'js'}`
       )}. Proceed?`,
          initial: true,
       })
@@ -134,7 +148,7 @@ export async function promptForConfig(
    }
 
    const resolvedConfig = await resolveConfigPaths(cwd, config)
-   const configFileName = resolvedConfig.tsx ? 'genies.config.ts' : 'genies.config.js'
+   const configFileName = `genies.config.${resolvedConfig.fileExtension === 'tsx' ? 'ts' : 'js'}`
 
    // In Datei schreiben.
    logger.info('')
@@ -154,6 +168,7 @@ export async function promptForMinimalConfig(
    const highlight = (text: string) => chalk.cyan(text)
    let style = defaultConfig.style
    let tsx = defaultConfig.tsx
+   let fileExtension = 'tsx'
 
    if (!defaults) {
       const options = await prompts([
@@ -176,6 +191,19 @@ export async function promptForMinimalConfig(
 
       style = options.style
       tsx = options.tsx
+
+      if (!tsx) {
+         const { extension } = await prompts({
+            type: 'select',
+            name: 'extension',
+            message: 'Which file extension do you prefer for JavaScript files?',
+            choices: [
+               { title: 'js', value: 'js' },
+               { title: 'jsx', value: 'jsx' },
+            ],
+         })
+         fileExtension = extension
+      }
    }
 
    const config = rawConfigSchema.parse({
@@ -183,11 +211,12 @@ export async function promptForMinimalConfig(
       componentsPath: defaultConfig.componentsPath,
       tsx,
       aliases: defaultConfig.aliases,
+      fileExtension,
    })
 
    // Bestimmen, ob TypeScript oder JavaScript verwendet wird.
    const resolvedConfig = await resolveConfigPaths(cwd, config)
-   const configFileName = resolvedConfig.tsx ? 'genies.config.ts' : 'genies.config.js'
+   const configFileName = `genies.config.${resolvedConfig.fileExtension === 'tsx' ? 'ts' : 'js'}`
 
    // In Datei schreiben.
    logger.info('')

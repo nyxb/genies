@@ -92,20 +92,20 @@ export const add = new Command()
 
          const fileName = getFileName(component, config.style)
          const functionName = getFunctionName(component)
-         const filePath = path.resolve(selectedDir, `${fileName}.tsx`)
+         const filePath = path.resolve(selectedDir, `${fileName}.${config.fileExtension}`)
 
          // Check if the component already exists in the selected directory
          if (existsSync(filePath) && !options.overwrite) {
             const { overwrite } = await prompts({
                type: 'confirm',
                name: 'overwrite',
-               message: `Component ${chalk.cyan(fileName)}.tsx already exists in ${violet(path.relative(cwd, selectedDir))}. Would you like to overwrite?`,
+               message: `Component ${chalk.cyan(`${fileName}.${config.fileExtension}`)} already exists in ${violet(path.relative(cwd, selectedDir))}. Would you like to overwrite?`,
                initial: false,
             })
 
             if (!overwrite) {
                logger.info(
-                  `Skipped ${chalk.cyan(fileName)}. To overwrite, run with the ${chalk.green(
+                  `Skipped ${chalk.cyan(`${fileName}.${config.fileExtension}`)}. To overwrite, run with the ${chalk.green(
                      '--overwrite',
                   )} flag.`,
                )
@@ -115,20 +115,20 @@ export const add = new Command()
 
          // Check if the component already exists in other directories
          const existingPaths = [baseDir, ...subDirs.map(dir => path.resolve(baseDir, dir))]
-            .map(dir => path.resolve(dir, `${fileName}.tsx`))
-            .filter(filePath => existsSync(filePath) && filePath !== path.resolve(selectedDir, `${fileName}.tsx`))
+            .map(dir => path.resolve(dir, `${fileName}.${config.fileExtension}`))
+            .filter(filePath => existsSync(filePath) && filePath !== path.resolve(selectedDir, `${fileName}.${config.fileExtension}`))
             .map(filePath => path.relative(cwd, filePath))
 
          if (existingPaths.length > 0) {
             const { confirmCreation } = await prompts({
                type: 'confirm',
                name: 'confirmCreation',
-               message: `A component named ${chalk.cyan(fileName)} already exists in the following directories:\n${existingPaths.map(p => violet(p)).join('\n')}\nDo you still want to create it in ${violet(path.relative(cwd, selectedDir))}?`,
+               message: `A component named ${chalk.cyan(`${fileName}.${config.fileExtension}`)} already exists in the following directories:\n${existingPaths.map(p => violet(p)).join('\n')}\nDo you still want to create it in ${violet(path.relative(cwd, selectedDir))}?`,
                initial: true,
             })
 
             if (!confirmCreation) {
-               logger.info(`Skipped creating ${chalk.cyan(fileName)} in ${violet(path.relative(cwd, selectedDir))}.`)
+               logger.info(`Skipped creating ${chalk.cyan(`${fileName}.${config.fileExtension}`)} in ${violet(path.relative(cwd, selectedDir))}.`)
                return
             }
          }
@@ -153,7 +153,7 @@ export const add = new Command()
          const spinner = ora(`Creating component...`).start()
          const content = COMPONENT.replace(/<%- componentName %>/g, functionName)
          await fs.writeFile(filePath, content)
-         spinner.succeed(`Component ${chalk.cyan(fileName)} created successfully.`)
+         spinner.succeed(`Component ${chalk.cyan(`${fileName}.${config.fileExtension}`)} created successfully.`)
       }
       catch (error) {
          handleError(error)

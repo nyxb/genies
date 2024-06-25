@@ -34,18 +34,21 @@ export const rawConfigSchema = z
       style: z.enum(styles).default(DEFAULT_STYLE),
       tsx: z.boolean().default(true),
       aliases: z.array(z.string()).optional(), // New property for aliases
+      fileExtension: z.string().optional(), // New property for file extension
    })
    .strict()
 
 
-export async function getConfig(cwd: string): Promise<RawConfig | null> {
+export async function getConfig(cwd: string): Promise<RawConfig & { fileExtension: string } | null> {
    try {
       const configResult = await explorer.search(cwd)
 
       if (!configResult)
          return null
 
-      return rawConfigSchema.parse(configResult.config)
+      const rawConfig = rawConfigSchema.parse(configResult.config)
+      const fileExtension = rawConfig.fileExtension || (rawConfig.tsx ? 'tsx' : 'js')
+      return { ...rawConfig, fileExtension }
    }
    catch (error) {
       throw new Error(`Invalid configuration found in ${cwd}`)
