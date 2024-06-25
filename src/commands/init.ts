@@ -108,7 +108,7 @@ export async function promptForConfig(
    const config = rawConfigSchema.parse({
       style: options.style,
       componentsPath: options.componentsPath,
-      tsx: options.tsx, // Added
+      tsx: options.tsx,
    })
 
    if (!skip) {
@@ -116,7 +116,7 @@ export async function promptForConfig(
          type: 'confirm',
          name: 'proceed',
          message: `Write configuration to ${highlight(
-        'genies.config.ts' // Updated
+        'genies.config.ts'
       )}. Proceed?`,
          initial: true,
       })
@@ -125,11 +125,10 @@ export async function promptForConfig(
          process.exit(0)
    }
 
-   // Determine if TypeScript or JavaScript is used.
    const resolvedConfig = await resolveConfigPaths(cwd, config)
    const configFileName = resolvedConfig.tsx ? 'genies.config.ts' : 'genies.config.js'
 
-   // Write to file.
+   // In Datei schreiben.
    logger.info('')
    const spinner = ora(`Writing ${configFileName}...`).start()
    const targetPath = path.resolve(cwd, configFileName)
@@ -174,18 +173,18 @@ export async function promptForMinimalConfig(
    const config = rawConfigSchema.parse({
       style,
       componentsPath: defaultConfig.componentsPath,
-      tsx, // Added
+      tsx,
    })
 
-   // Determine if TypeScript or JavaScript is used.
+   // Bestimmen, ob TypeScript oder JavaScript verwendet wird.
    const resolvedConfig = await resolveConfigPaths(cwd, config)
    const configFileName = resolvedConfig.tsx ? 'genies.config.ts' : 'genies.config.js'
 
-   // Write to file.
+   // In Datei schreiben.
    logger.info('')
    const spinner = ora(`Writing ${configFileName}...`).start()
    const targetPath = path.resolve(cwd, configFileName)
-   await fs.writeFile(targetPath, JSON.stringify(config, null, 2), 'utf8')
+   await fs.writeFile(targetPath, `export default ${JSON.stringify(config, null, 2)}`, 'utf8')
    spinner.succeed()
 
    return resolvedConfig

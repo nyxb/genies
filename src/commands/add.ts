@@ -15,7 +15,6 @@ import snakeCase from 'lodash/snakeCase.js'
 import startCase from 'lodash/startCase.js'
 
 const addOptionsSchema = z.object({
-   components: z.array(z.string()).optional(),
    yes: z.boolean(),
    overwrite: z.boolean(),
    cwd: z.string(),
@@ -25,7 +24,7 @@ const addOptionsSchema = z.object({
 export const add = new Command()
    .name('add')
    .description('add a component to your project')
-   .argument('[components...]', 'the components to add')
+   .argument('<component...>', 'the component to add')
    .option('-y, --yes', 'skip confirmation prompt.', true)
    .option('-o, --overwrite', 'overwrite existing files.', false)
    .option(
@@ -34,13 +33,13 @@ export const add = new Command()
       process.cwd(),
    )
    .option('-p, --path <path>', 'the path to add the component to.')
-   .action(async (components, opts) => {
+   .action(async (componentArgs, opts) => {
       try {
          const options = addOptionsSchema.parse({
-            components,
             ...opts,
          })
 
+         const component = componentArgs.join(' ')
          const cwd = path.resolve(options.cwd)
 
          if (!existsSync(cwd)) {
@@ -53,71 +52,62 @@ export const add = new Command()
             logger.warn(
           `Configuration is missing. Please run ${chalk.green(
             `init`,
-          )} to create a genies.json file.`,
+          )} to create a genies config file.`,
             )
             process.exit(1)
          }
 
-         let selectedComponents = options.components
-         if (!options.components?.length) {
-            const { components } = await prompts({
-               type: 'list',
-               name: 'components',
-               message: 'Which components would you like to add?',
-               separator: ',',
-            })
-            selectedComponents = components
-         }
+         const spinner = ora(`Creating component...`).start()
+         spinner.text = `Creating ${component}...`
+         const targetDir = options.path ? path.resolve(cwd, options.path) : path.resolve(cwd, config.componentsPath.replace('~', cwd))
 
-         if (!selectedComponents?.length) {
-            logger.warn('No components selected. Exiting.')
-            process.exit(0)
-         }
-
-         if (!options.yes) {
-            const { proceed } = await prompts({
+         // Check if the target directory exists, if not, prompt to create it
+         if (!existsSync(targetDir)) {
+            spinner.stop()
+            const { createDir } = await prompts({
                type: 'confirm',
-               name: 'proceed',
-               message: `Ready to create components. Proceed?`,
+               name: 'createDir',
+               message: `The directory ${targetDir} does not exist. Would you like to create it?`,
                initial: true,
             })
 
-            if (!proceed)
+            if (!createDir) {
+               logger.warn(`Directory ${targetDir} does not exist. Exiting.`)
                process.exit(0)
-         }
-
-         const spinner = ora(`Creating components...`).start()
-         for (const componentName of selectedComponents) {
-            spinner.text = `Creating ${componentName}...`
-            const targetDir = options.path ? path.resolve(cwd, options.path) : path.resolve(cwd, config.componentsPath)
-            const fileName = getFileName(componentName, config.style)
-            const filePath = path.resolve(targetDir, `${fileName}.tsx`)
-
-            if (existsSync(filePath) && !options.overwrite) {
-               spinner.stop()
-               const { overwrite } = await prompts({
-                  type: 'confirm',
-                  name: 'overwrite',
-                  message: `Component ${fileName} already exists. Would you like to overwrite?`,
-                  initial: false,
-               })
-
-               if (!overwrite) {
-                  logger.info(
-                     `Skipped ${fileName}. To overwrite, run with the ${chalk.green(
-                        '--overwrite',
-                     )} flag.`,
-                  )
-                  continue
-               }
-
-               spinner.start(`Creating ${fileName}...`)
             }
 
-            const content = COMPONENT.replace(/<%- componentName %>/g, componentName)
-            await fs.writeFile(filePath, content)
+            await fs.mkdir(targetDir, { recursive: true })
+            spinner.start(`Creating ${component}...`)
          }
-         spinner.succeed(`Done.`)
+
+         const fileName = getFileName(component, config.style)
+         const functionName = getFunctionName(component)
+         const filePath = path.resolve(targetDir, `${fileName}.tsx`)
+
+         if (existsSync(filePath) && !options.overwrite) {
+            spinner.stop()
+            const { overwrite } = await prompts({
+               type: 'confirm',
+               name: 'overwrite',
+               message: `Component ${fileName} already exists. Would you like to overwrite?`,
+               initial: false,
+            })
+
+            if (!overwrite) {
+               logger.info(
+                  `Skipped ${fileName}. To overwrite, run with the ${chalk.green(
+                     '--overwrite',
+                  )} flag.`,
+               )
+               return
+            }
+
+            spinner.start(`Creating ${fileName}...`)
+         }
+
+         const content = COMPONENT.replace(/<%- componentName %>/g, functionName)
+         await fs.writeFile(filePath, content)
+         spinner.succeed(`Component ${fileName} created successfully.`)
       }
       catch (error) {
          handleError(error)
@@ -137,4 +127,8 @@ function getFileName(name: string, style: string): string {
       default:
          return name
    }
+}
+
+function getFunctionName(name: string): string {
+   return startCase(camelCase(name)).replace(/ /g, '')
 }

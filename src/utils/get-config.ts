@@ -1,4 +1,3 @@
-import path from 'node:path'
 import { cosmiconfig } from 'cosmiconfig'
 import { z } from 'zod'
 import { loadConfig } from 'tsconfig-paths'
@@ -6,7 +5,7 @@ import { resolveImport } from '~/src/utils/resolve-import'
 
 export const DEFAULT_STYLE = 'kebab-case'
 export const DEFAULT_COMPONENTS = '~/components'
-export const styles = ['camelCase', 'kebab-case', 'snake_case', 'Start Case'] as const
+export const styles = ['camelCase', 'kebab-case', 'snake_case', 'StartCase'] as const
 
 const explorer = cosmiconfig('genies', {
    searchPlaces: [
@@ -64,10 +63,12 @@ export async function resolveConfigPaths(cwd: string, config: RawConfig) {
       )
    }
 
-   return configSchema.parse({
+   const resolvedPaths = {
+      components: await resolveImport(config.componentsPath, tsConfig),
+   }
+
+   return {
       ...config,
-      resolvedPaths: {
-         components: await resolveImport(config.aliases.components, tsConfig),
-      },
-   })
+      resolvedPaths,
+   }
 }
