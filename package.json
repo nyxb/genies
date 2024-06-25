@@ -1,0 +1,77 @@
+{
+  "name": "genies",
+  "type": "module",
+  "version": "0.0.0",
+  "description": "Add components to your apps.",
+  "publishConfig": {
+    "access": "public"
+  },
+  "author": {
+    "name": "nyxb",
+    "url": "https://twitter.com/nyxb0"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nyxb/genies.git"
+  },
+  "keywords": [
+    "components",
+    "ui",
+    "nyxb"
+  ],
+  "exports": "./dist/index.js",
+  "bin": "./dist/index.js",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "tsup --watch",
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf dist && rimraf components",
+    "start": "node dist/index.js",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "release": "bumping",
+    "pub:beta": "pnpm build && pnpm publish --no-git-checks --access public --tag beta",
+    "pub:next": "pnpm build && pnpm publish --no-git-checks --access public --tag next",
+    "pub:release": "pnpm build && pnpm publish --access public",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@babel/core": "^7.24.7",
+    "@babel/parser": "^7.24.7",
+    "@babel/plugin-transform-typescript": "^7.24.7",
+    "@nyxb/nyxi": "^1.0.0",
+    "bumping": "^9.2.1",
+    "chalk": "5.2.0",
+    "commander": "^10.0.1",
+    "cosmiconfig": "^8.3.6",
+    "diff": "^5.2.0",
+    "execa": "^7.2.0",
+    "fast-glob": "^3.3.2",
+    "fs-extra": "^11.2.0",
+    "https-proxy-agent": "^6.2.1",
+    "lodash": "^4.17.21",
+    "lodash.template": "^4.5.0",
+    "ora": "^6.3.1",
+    "prompts": "^2.4.2",
+    "recast": "^0.23.9",
+    "ts-morph": "^18.0.0",
+    "tsconfig-paths": "^4.2.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/babel__core": "^7.20.5",
+    "@types/diff": "^5.2.1",
+    "@types/fs-extra": "^11.0.4",
+    "@types/lodash": "^4.17.5",
+    "@types/lodash.template": "^4.5.3",
+    "@types/prompts": "^2.4.9",
+    "rimraf": "^4.4.1",
+    "tsup": "^6.7.0",
+    "type-fest": "^3.13.1",
+    "typescript": "^5.5.2"
+  }
+}

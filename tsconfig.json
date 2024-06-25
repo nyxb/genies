@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "~/*": ["./*"]
+    },
+    "isolatedModules": false,
+    "composite": false,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "strict": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "declaration": true,
+    "declarationMap": true,
+    "inlineSources": false,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "preserveWatchOutput": true,
+    "skipLibCheck": true
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules"]
+}
