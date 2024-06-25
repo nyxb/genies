@@ -98,6 +98,13 @@ export async function promptForConfig(
          initial: defaultConfig?.componentsPath ?? DEFAULT_COMPONENTS,
       },
       {
+         type: 'list',
+         name: 'aliases',
+         message: `Enter aliases for subdirectories (comma separated):`,
+         initial: defaultConfig?.aliases?.join(', ') ?? '',
+         separator: ',',
+      },
+      {
          type: 'confirm',
          name: 'tsx',
          message: `Are you using TypeScript?`,
@@ -109,6 +116,7 @@ export async function promptForConfig(
       style: options.style,
       componentsPath: options.componentsPath,
       tsx: options.tsx,
+      aliases: options.aliases,
    })
 
    if (!skip) {
@@ -174,6 +182,7 @@ export async function promptForMinimalConfig(
       style,
       componentsPath: defaultConfig.componentsPath,
       tsx,
+      aliases: defaultConfig.aliases,
    })
 
    // Bestimmen, ob TypeScript oder JavaScript verwendet wird.

@@ -1,5 +1,8 @@
 export default {
   "componentsPath": "~/components",
   "style": "kebab-case",
-  "tsx": true
+  "tsx": true,
+  "aliases": [
+    "ui"
+  ]
 }

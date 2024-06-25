@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function IrgendEineComponente() {
+export default function IrgendEine() {
   return (
     <>
     </>

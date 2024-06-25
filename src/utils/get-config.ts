@@ -33,6 +33,7 @@ export const rawConfigSchema = z
       componentsPath: z.string().default(DEFAULT_COMPONENTS),
       style: z.enum(styles).default(DEFAULT_STYLE),
       tsx: z.boolean().default(true),
+      aliases: z.array(z.string()).optional(), // New property for aliases
    })
    .strict()
 

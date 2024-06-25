@@ -1,6 +1,7 @@
 import { existsSync, promises as fs } from 'node:fs'
 import path from 'node:path'
 import chalk from 'chalk'
+import { violet } from '~/src/utils/colors'
 import { Command } from 'commander'
 import ora from 'ora'
 import prompts from 'prompts'
@@ -57,57 +58,102 @@ export const add = new Command()
             process.exit(1)
          }
 
-         const spinner = ora(`Creating component...`).start()
-         spinner.text = `Creating ${component}...`
-         const targetDir = options.path ? path.resolve(cwd, options.path) : path.resolve(cwd, config.componentsPath.replace('~', cwd))
+         const baseDir = config.componentsPath.replace('~', cwd)
+         const targetDir = options.path ? path.resolve(cwd, options.path) : path.resolve(cwd, baseDir)
 
-         // Check if the target directory exists, if not, prompt to create it
-         if (!existsSync(targetDir)) {
-            spinner.stop()
-            const { createDir } = await prompts({
-               type: 'confirm',
-               name: 'createDir',
-               message: `The directory ${targetDir} does not exist. Would you like to create it?`,
-               initial: true,
+         // Check if the base directory exists
+         if (!existsSync(baseDir)) {
+            logger.error(`The base directory ${baseDir} does not exist. Please check your configuration.`)
+            process.exit(1)
+         }
+
+         // Get subdirectories in the base directory
+         const subDirs = config.aliases || []
+
+         let selectedDir = baseDir
+
+         const { useSubDir } = await prompts({
+            type: 'confirm',
+            name: 'useSubDir',
+            message: 'Do you want to create the component in a subdirectory?',
+            initial: false,
+         })
+
+         if (useSubDir) {
+            const { chosenDir } = await prompts({
+               type: 'select',
+               name: 'chosenDir',
+               message: 'Select a directory to add the component to:',
+               choices: subDirs.map(dir => ({ title: dir, value: path.resolve(baseDir, dir) })),
             })
 
-            if (!createDir) {
-               logger.warn(`Directory ${targetDir} does not exist. Exiting.`)
-               process.exit(0)
-            }
-
-            await fs.mkdir(targetDir, { recursive: true })
-            spinner.start(`Creating ${component}...`)
+            selectedDir = chosenDir
          }
 
          const fileName = getFileName(component, config.style)
          const functionName = getFunctionName(component)
-         const filePath = path.resolve(targetDir, `${fileName}.tsx`)
+         const filePath = path.resolve(selectedDir, `${fileName}.tsx`)
 
+         // Check if the component already exists in the selected directory
          if (existsSync(filePath) && !options.overwrite) {
-            spinner.stop()
             const { overwrite } = await prompts({
                type: 'confirm',
                name: 'overwrite',
-               message: `Component ${fileName} already exists. Would you like to overwrite?`,
+               message: `Component ${chalk.cyan(fileName)}.tsx already exists in ${violet(path.relative(cwd, selectedDir))}. Would you like to overwrite?`,
                initial: false,
             })
 
             if (!overwrite) {
                logger.info(
-                  `Skipped ${fileName}. To overwrite, run with the ${chalk.green(
+                  `Skipped ${chalk.cyan(fileName)}. To overwrite, run with the ${chalk.green(
                      '--overwrite',
                   )} flag.`,
                )
                return
             }
-
-            spinner.start(`Creating ${fileName}...`)
          }
 
+         // Check if the component already exists in other directories
+         const existingPaths = [baseDir, ...subDirs.map(dir => path.resolve(baseDir, dir))]
+            .map(dir => path.resolve(dir, `${fileName}.tsx`))
+            .filter(filePath => existsSync(filePath) && filePath !== path.resolve(selectedDir, `${fileName}.tsx`))
+            .map(filePath => path.relative(cwd, filePath))
+
+         if (existingPaths.length > 0) {
+            const { confirmCreation } = await prompts({
+               type: 'confirm',
+               name: 'confirmCreation',
+               message: `A component named ${chalk.cyan(fileName)} already exists in the following directories:\n${existingPaths.map(p => violet(p)).join('\n')}\nDo you still want to create it in ${violet(path.relative(cwd, selectedDir))}?`,
+               initial: true,
+            })
+
+            if (!confirmCreation) {
+               logger.info(`Skipped creating ${chalk.cyan(fileName)} in ${violet(path.relative(cwd, selectedDir))}.`)
+               return
+            }
+         }
+
+         // Check if the target directory exists, if not, prompt to create it
+         if (!existsSync(selectedDir)) {
+            const { createDir } = await prompts({
+               type: 'confirm',
+               name: 'createDir',
+               message: `The directory ${violet(path.relative(cwd, selectedDir))} does not exist. Would you like to create it?`,
+               initial: true,
+            })
+
+            if (!createDir) {
+               logger.warn(`Directory ${violet(path.relative(cwd, selectedDir))} does not exist. Exiting.`)
+               process.exit(0)
+            }
+
+            await fs.mkdir(selectedDir, { recursive: true })
+         }
+
+         const spinner = ora(`Creating component...`).start()
          const content = COMPONENT.replace(/<%- componentName %>/g, functionName)
          await fs.writeFile(filePath, content)
-         spinner.succeed(`Component ${fileName} created successfully.`)
+         spinner.succeed(`Component ${chalk.cyan(fileName)} created successfully.`)
       }
       catch (error) {
          handleError(error)

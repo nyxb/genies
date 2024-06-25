@@ -79,9 +79,17 @@ export async function getProjectConfig(cwd: string): Promise<Config | null> {
 
    const isTsx = await isTypeScriptProject(cwd)
 
+   // Erkennen von Unterordnern im Komponentenverzeichnis
+   const componentsPath = `${tsConfigAliasPrefix}/components`
+   const subDirs = (await fs.readdir(path.resolve(cwd, componentsPath), { withFileTypes: true }))
+      .filter(dirent => dirent.isDirectory())
+      .map(dirent => dirent.name)
+
    const config: Config = {
-      componentsPath: `${tsConfigAliasPrefix}/components`,
+      componentsPath,
       style: 'kebab-case',
+      tsx: isTsx,
+      aliases: subDirs, // Hinzufügen der Aliase zur Konfiguration
    }
 
    return config
