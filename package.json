@@ -1,7 +1,7 @@
 {
   "name": "genies",
   "type": "module",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Add React components to your apps.",
   "publishConfig": {
     "access": "public"
