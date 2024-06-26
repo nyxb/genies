@@ -63,8 +63,19 @@ export const add = new Command()
 
          // Check if the base directory exists
          if (!existsSync(baseDir)) {
-            logger.error(`The base directory ${baseDir} does not exist. Please check your configuration.`)
-            process.exit(1)
+            const { createBaseDir } = await prompts({
+               type: 'confirm',
+               name: 'createBaseDir',
+               message: `The base directory ${violet(baseDir)} does not exist. Would you like to create it?`,
+               initial: true,
+            })
+
+            if (!createBaseDir) {
+               logger.warn(`Directory ${violet(baseDir)} does not exist. Exiting.`)
+               process.exit(0)
+            }
+
+            await fs.mkdir(baseDir, { recursive: true })
          }
 
          // Get subdirectories in the base directory
@@ -153,9 +164,8 @@ export const add = new Command()
          const spinner = ora(`Creating component...`).start()
          const content = COMPONENT.replace(/<%- componentName %>/g, functionName)
          await fs.writeFile(filePath, content)
-         spinner.succeed(`Component ${chalk.cyan(`${fileName}.${config.fileExtension}`)} created successfully.`)
-      }
-      catch (error) {
+         spinner.succeed(`Component ${chalk.cyan(`${fileName}.${config.fileExtension}`)} created successfully in ${violet(path.relative(cwd, selectedDir))}.`)
+      } catch (error) {
          handleError(error)
       }
    })

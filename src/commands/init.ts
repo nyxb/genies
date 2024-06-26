@@ -111,7 +111,8 @@ export async function promptForConfig(
       },
    ])
 
-   let fileExtension = 'mjs'
+   let configFileExtension = 'mjs'
+   let componentFileExtension = 'tsx'
    if (!options.tsx) {
       const { extension } = await prompts({
          type: 'select',
@@ -122,7 +123,8 @@ export async function promptForConfig(
             { title: 'jsx', value: 'jsx' },
          ],
       })
-      fileExtension = 'cjs'
+      configFileExtension = 'cjs'
+      componentFileExtension = extension
    }
 
    const config = rawConfigSchema.parse({
@@ -130,7 +132,7 @@ export async function promptForConfig(
       componentsPath: options.componentsPath,
       tsx: options.tsx,
       aliases: options.aliases,
-      fileExtension,
+      fileExtension: componentFileExtension,
    })
 
    if (!skip) {
@@ -138,7 +140,7 @@ export async function promptForConfig(
          type: 'confirm',
          name: 'proceed',
          message: `Write configuration to ${highlight(
-        `genies.config.${fileExtension}`
+        `genies.config.${configFileExtension}`
       )}. Proceed?`,
          initial: true,
       })
@@ -148,7 +150,7 @@ export async function promptForConfig(
    }
 
    const resolvedConfig = await resolveConfigPaths(cwd, config)
-   const configFileName = `genies.config.${resolvedConfig.fileExtension}`
+   const configFileName = `genies.config.${configFileExtension}`
 
    // In Datei schreiben.
    logger.info('')
@@ -168,7 +170,8 @@ export async function promptForMinimalConfig(
    const highlight = (text: string) => chalk.cyan(text)
    let style = defaultConfig.style
    let tsx = defaultConfig.tsx
-   let fileExtension = 'mjs'
+   let configFileExtension = 'mjs'
+   let componentFileExtension = 'tsx'
 
    if (!defaults) {
       const options = await prompts([
@@ -202,7 +205,8 @@ export async function promptForMinimalConfig(
                { title: 'jsx', value: 'jsx' },
             ],
          })
-         fileExtension = 'cjs'
+         configFileExtension = 'cjs'
+         componentFileExtension = extension
       }
    }
 
@@ -211,12 +215,12 @@ export async function promptForMinimalConfig(
       componentsPath: defaultConfig.componentsPath,
       tsx,
       aliases: defaultConfig.aliases,
-      fileExtension,
+      fileExtension: componentFileExtension,
    })
 
    // Bestimmen, ob TypeScript oder JavaScript verwendet wird.
    const resolvedConfig = await resolveConfigPaths(cwd, config)
-   const configFileName = `genies.config.${resolvedConfig.fileExtension}`
+   const configFileName = `genies.config.${configFileExtension}`
 
    // In Datei schreiben.
    logger.info('')
