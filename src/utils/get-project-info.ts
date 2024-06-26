@@ -61,6 +61,7 @@ export async function getTsConfig() {
       return tsconfig
    }
    catch (error) {
+      console.error(`Error loading tsconfig.json:`, error)
       return null
    }
 }
@@ -80,7 +81,7 @@ export async function getProjectConfig(cwd: string): Promise<RawConfig | null> {
    const isTsx = await isTypeScriptProject(cwd)
 
    // Erkennen von Unterordnern im Komponentenverzeichnis
-   const componentsPath = `${tsConfigAliasPrefix}/components`
+   const componentsPath = path.join(tsConfigAliasPrefix, 'components')
    const subDirs = (await fs.readdir(path.resolve(cwd, componentsPath), { withFileTypes: true }))
       .filter(dirent => dirent.isDirectory())
       .map(dirent => dirent.name)
@@ -136,3 +137,4 @@ export async function isTypeScriptProject(cwd: string) {
    // Check if cwd has a tsconfig.json file.
    return pathExists(path.resolve(cwd, 'tsconfig.json'))
 }
+

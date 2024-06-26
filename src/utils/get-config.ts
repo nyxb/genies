@@ -51,6 +51,7 @@ export async function getConfig(cwd: string): Promise<RawConfig & { fileExtensio
       return { ...rawConfig, fileExtension }
    }
    catch (error) {
+      console.error(`Invalid configuration found in ${cwd}:`, error)
       throw new Error(`Invalid configuration found in ${cwd}`)
    }
 }
