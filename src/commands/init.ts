@@ -111,7 +111,7 @@ export async function promptForConfig(
       },
    ])
 
-   let fileExtension = 'tsx'
+   let fileExtension = 'mjs'
    if (!options.tsx) {
       const { extension } = await prompts({
          type: 'select',
@@ -122,7 +122,7 @@ export async function promptForConfig(
             { title: 'jsx', value: 'jsx' },
          ],
       })
-      fileExtension = extension
+      fileExtension = 'cjs'
    }
 
    const config = rawConfigSchema.parse({
@@ -138,7 +138,7 @@ export async function promptForConfig(
          type: 'confirm',
          name: 'proceed',
          message: `Write configuration to ${highlight(
-        `genies.config.${fileExtension === 'tsx' ? 'ts' : 'js'}`
+        `genies.config.${fileExtension}`
       )}. Proceed?`,
          initial: true,
       })
@@ -148,7 +148,7 @@ export async function promptForConfig(
    }
 
    const resolvedConfig = await resolveConfigPaths(cwd, config)
-   const configFileName = `genies.config.${resolvedConfig.fileExtension === 'tsx' ? 'ts' : 'js'}`
+   const configFileName = `genies.config.${resolvedConfig.fileExtension}`
 
    // In Datei schreiben.
    logger.info('')
@@ -168,7 +168,7 @@ export async function promptForMinimalConfig(
    const highlight = (text: string) => chalk.cyan(text)
    let style = defaultConfig.style
    let tsx = defaultConfig.tsx
-   let fileExtension = 'tsx'
+   let fileExtension = 'mjs'
 
    if (!defaults) {
       const options = await prompts([
@@ -202,7 +202,7 @@ export async function promptForMinimalConfig(
                { title: 'jsx', value: 'jsx' },
             ],
          })
-         fileExtension = extension
+         fileExtension = 'cjs'
       }
    }
 
@@ -216,7 +216,7 @@ export async function promptForMinimalConfig(
 
    // Bestimmen, ob TypeScript oder JavaScript verwendet wird.
    const resolvedConfig = await resolveConfigPaths(cwd, config)
-   const configFileName = `genies.config.${resolvedConfig.fileExtension === 'tsx' ? 'ts' : 'js'}`
+   const configFileName = `genies.config.${resolvedConfig.fileExtension}`
 
    // In Datei schreiben.
    logger.info('')

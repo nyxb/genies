@@ -9,21 +9,12 @@ export const styles = ['camelCase', 'kebab-case', 'snake_case', 'StartCase'] as 
 
 const explorer = cosmiconfig('genies', {
    searchPlaces: [
-      'package.json',
-      '.genies',
-      '.genies.json',
-      '.genies.yaml',
-      '.genies.yml',
-      '.genies.js',
-      '.genies.ts',
       '.genies.mjs',
       '.genies.cjs',
-      'genies.config.js',
-      'genies.config.ts',
       'genies.config.mjs',
       'genies.config.cjs',
       'genies.json'
-   ],
+   ]
 })
 
 export type RawConfig = z.infer<typeof rawConfigSchema>
@@ -37,7 +28,6 @@ export const rawConfigSchema = z
       fileExtension: z.string().optional(), // New property for file extension
    })
    .strict()
-
 
 export async function getConfig(cwd: string): Promise<RawConfig & { fileExtension: string } | null> {
    try {
