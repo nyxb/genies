@@ -66,12 +66,12 @@ export const add = new Command()
             const { createBaseDir } = await prompts({
                type: 'confirm',
                name: 'createBaseDir',
-               message: `The base directory ${violet(baseDir)} does not exist. Would you like to create it?`,
+               message: `The base directory ${violet(path.relative(cwd, baseDir))} does not exist. Would you like to create it?`,
                initial: true,
             })
 
             if (!createBaseDir) {
-               logger.warn(`Directory ${violet(baseDir)} does not exist. Exiting.`)
+               logger.warn(`Directory ${violet(path.relative(cwd, baseDir))} does not exist. Exiting.`)
                process.exit(0)
             }
 
