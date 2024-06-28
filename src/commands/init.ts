@@ -215,6 +215,8 @@ export async function promptForMinimalConfig(
 
    const configFileName = `genies.config.${configFileExtension}`
 
+   const configFileName = `genies.config.${configFileExtension}`
+
    // In Datei schreiben.
    logger.info('')
    const spinner = ora(`Writing ${configFileName}...`).start()
