@@ -67,33 +67,28 @@ export async function getTsConfig() {
 }
 
 export async function getProjectConfig(cwd: string): Promise<RawConfig | null> {
-   // Check for existing component config.
-   const existingConfig = await getConfig(cwd)
-   if (existingConfig)
-      return existingConfig
+  // Check for existing component config.
+  const existingConfig = await getConfig(cwd);
+  if (existingConfig) return existingConfig;
 
-   const projectType = await getProjectType(cwd)
-   const tsConfigAliasPrefix = await getTsConfigAliasPrefix(cwd)
+  // Prompt the user for the components path if no config is found
+  const { componentsPath } = await prompts({
+    type: 'text',
+    name: 'componentsPath',
+    message: `Enter the path for your components directory:`,
+    initial: DEFAULT_COMPONENTS,
+  });
 
-   if (!projectType || !tsConfigAliasPrefix)
-      return null
+  const isTsx = await isTypeScriptProject(cwd);
 
-   const isTsx = await isTypeScriptProject(cwd)
+  const config: RawConfig = {
+    componentsPath: path.resolve(cwd, componentsPath),
+    style: 'kebab-case',
+    tsx: isTsx,
+    aliases: [], // Hinzufügen der Aliase zur Konfiguration
+  };
 
-   // Erkennen von Unterordnern im Komponentenverzeichnis
-   const componentsPath = path.join(tsConfigAliasPrefix, 'components')
-   const subDirs = (await fs.readdir(path.resolve(cwd, componentsPath), { withFileTypes: true }))
-      .filter(dirent => dirent.isDirectory())
-      .map(dirent => dirent.name)
-
-   const config: RawConfig = {
-      componentsPath,
-      style: 'kebab-case',
-      tsx: isTsx,
-      aliases: subDirs, // Hinzufügen der Aliase zur Konfiguration
-   }
-
-   return config
+  return config;
 }
 
 export async function getProjectType(cwd: string): Promise<ProjectType | null> {
@@ -137,4 +132,3 @@ export async function isTypeScriptProject(cwd: string) {
    // Check if cwd has a tsconfig.json file.
    return pathExists(path.resolve(cwd, 'tsconfig.json'))
 }
-
