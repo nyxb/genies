@@ -3,10 +3,9 @@ import path from 'node:path'
 import fg from 'fast-glob'
 import fs, { pathExists } from 'fs-extra'
 import { loadConfig } from 'tsconfig-paths'
-import { getConfig } from '~/src/utils/get-config'
+import prompts from 'prompts'
+import { DEFAULT_COMPONENTS, getConfig } from '~/src/utils/get-config'
 import type { RawConfig } from '~/src/utils/get-config'
-import prompts from 'prompts';
-import { rawConfigSchema, DEFAULT_COMPONENTS, styles } from '~/src/utils/get-config';
 
 // TODO: Add support for more frameworks.
 // We'll start with Next.js for now.
@@ -36,20 +35,20 @@ export async function getProjectInfo(cwd: string) {
    }
 
    try {
-      const tsconfig = await getTsConfig(cwd);
-      const hasTsconfig = tsconfig !== null;
+      const tsconfig = await getTsConfig(cwd)
+      const hasTsconfig = tsconfig !== null
 
       return {
          tsconfig,
          srcDir: existsSync(path.resolve(cwd, 'src')),
          appDir:
-            existsSync(path.resolve(cwd, 'app')) ||
-            existsSync(path.resolve(cwd, 'src/app')),
+            existsSync(path.resolve(cwd, 'app'))
+            || existsSync(path.resolve(cwd, 'src/app')),
          isTsx: hasTsconfig,
       }
    }
    catch (error) {
-      console.error('Error getting project info:', error);
+      console.error('Error getting project info:', error)
       return info
    }
 }
@@ -72,42 +71,43 @@ export async function getTsConfig(cwd: string) {
 
 export async function getProjectConfig(cwd: string): Promise<RawConfig | null> {
    // Check for existing component config.
-   const existingConfig = await getConfig(cwd);
-   if (existingConfig) return existingConfig;
+   const existingConfig = await getConfig(cwd)
+   if (existingConfig)
+      return existingConfig
 
-   const projectInfo = await getProjectInfo(cwd);
-   const { isTsx } = projectInfo;
+   const projectInfo = await getProjectInfo(cwd)
+   const { isTsx } = projectInfo
 
    const { componentsPath, aliases, useTsx } = await prompts([
-     {
-       type: 'text',
-       name: 'componentsPath',
-       message: `Enter the path for your components directory:`,
-       initial: DEFAULT_COMPONENTS,
-     },
-     {
-       type: 'list',
-       name: 'aliases',
-       message: `Enter aliases for subdirectories (comma separated):`,
-       initial: '',
-       separator: ',',
-     },
-     {
-       type: 'confirm',
-       name: 'useTsx',
-       message: `Are you using TypeScript?`,
-       initial: isTsx !== null ? isTsx : true,
-     },
-   ]);
+      {
+         type: 'text',
+         name: 'componentsPath',
+         message: `Enter the path for your components directory:`,
+         initial: DEFAULT_COMPONENTS,
+      },
+      {
+         type: 'list',
+         name: 'aliases',
+         message: `Enter aliases for subdirectories (comma separated):`,
+         initial: '',
+         separator: ',',
+      },
+      {
+         type: 'confirm',
+         name: 'useTsx',
+         message: `Are you using TypeScript?`,
+         initial: isTsx !== null ? isTsx : true,
+      },
+   ])
 
    const config: RawConfig = {
-     componentsPath: path.resolve(cwd, componentsPath),
-     style: 'kebab-case',
-     tsx: useTsx,
-     aliases: aliases.map(alias => alias.trim()),
-   };
+      componentsPath: path.resolve(cwd, componentsPath),
+      style: 'kebab-case',
+      tsx: useTsx,
+      aliases: aliases.map(alias => alias.trim()),
+   }
 
-   return config;
+   return config
 }
 
 export async function getProjectType(cwd: string): Promise<ProjectType | null> {

@@ -1,19 +1,19 @@
 import { existsSync, promises as fs } from 'node:fs'
 import path from 'node:path'
 import chalk from 'chalk'
-import { violet } from '~/src/utils/colors'
 import { Command } from 'commander'
 import ora from 'ora'
 import prompts from 'prompts'
 import { z } from 'zod'
-import { getConfig } from '~/src/utils/get-config'
-import { handleError } from '~/src/utils/handle-error'
-import { logger } from '~/src/utils/logger'
-import { COMPONENT } from '~/src/utils/templates'
 import camelCase from 'lodash/camelCase.js'
 import kebabCase from 'lodash/kebabCase.js'
 import snakeCase from 'lodash/snakeCase.js'
 import startCase from 'lodash/startCase.js'
+import { getConfig } from '~/src/utils/get-config'
+import { handleError } from '~/src/utils/handle-error'
+import { logger } from '~/src/utils/logger'
+import { COMPONENT } from '~/src/utils/templates'
+import { violet } from '~/src/utils/colors'
 
 const addOptionsSchema = z.object({
    yes: z.boolean(),
@@ -81,7 +81,7 @@ export const add = new Command()
          // Get subdirectories in the base directory
          const subDirs = config.aliases || []
 
-         let selectedDir = baseDir
+         let selectedDir = targetDir
 
          const { useSubDir } = await prompts({
             type: 'confirm',
@@ -165,7 +165,8 @@ export const add = new Command()
          const content = COMPONENT.replace(/<%- componentName %>/g, functionName)
          await fs.writeFile(filePath, content)
          spinner.succeed(`Component ${chalk.cyan(`${fileName}.${config.fileExtension}`)} created successfully in ${violet(path.relative(cwd, selectedDir))}.`)
-      } catch (error) {
+      }
+      catch (error) {
          handleError(error)
       }
    })

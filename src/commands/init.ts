@@ -10,9 +10,9 @@ import { logger } from '~/src/utils/logger'
 import { handleError } from '~/src/utils/handle-error'
 import { getProjectConfig } from '~/src/utils/get-project-info'
 import {
+   DEFAULT_COMPONENTS,
    rawConfigSchema,
    styles,
-   DEFAULT_COMPONENTS,
 } from '~/src/utils/get-config'
 import type { RawConfig } from '~/src/utils/get-config'
 
@@ -51,7 +51,8 @@ export const init = new Command()
                projectConfig,
                opts.defaults,
             )
-         } else {
+         }
+         else {
             config = await promptForConfig(cwd, null, options.yes)
          }
 
@@ -64,7 +65,8 @@ export const init = new Command()
             )} Project initialization completed. You may now add components.`,
          )
          logger.info('')
-      } catch (error) {
+      }
+      catch (error) {
          handleError(error)
       }
    })
@@ -123,38 +125,21 @@ export async function promptForConfig(
       componentFileExtension = extension
    }
 
-   if (!projectConfig) {
-      const { componentsPath } = await prompts({
-         type: 'text',
-         name: 'componentsPath',
-         message: `Enter the path for your components directory:`,
-         initial: DEFAULT_COMPONENTS,
-      });
-
-      config = rawConfigSchema.parse({
-         style: options.style,
-         componentsPath,
-         tsx: options.tsx,
-         aliases: options.aliases,
-         fileExtension: componentFileExtension,
-      });
-   } else {
-      config = rawConfigSchema.parse({
-         style: options.style,
-         componentsPath: options.componentsPath,
-         tsx: options.tsx,
-         aliases: options.aliases,
-         fileExtension: componentFileExtension,
-      })
-   }
+   const config = rawConfigSchema.parse({
+      style: options.style,
+      componentsPath: options.componentsPath,
+      tsx: options.tsx,
+      aliases: options.aliases,
+      fileExtension: componentFileExtension,
+   })
 
    if (!skip) {
       const { proceed } = await prompts({
          type: 'confirm',
          name: 'proceed',
          message: `Write configuration to ${highlight(
-        `genies.config.${configFileExtension}`
-      )}. Proceed?`,
+            `genies.config.${configFileExtension}`,
+         )}. Proceed?`,
          initial: true,
       })
 
@@ -232,7 +217,6 @@ export async function promptForMinimalConfig(
 
    const configFileName = `genies.config.${configFileExtension}`
 
-
    // In Datei schreiben.
    logger.info('')
    const spinner = ora(`Writing ${configFileName}...`).start()
@@ -244,7 +228,11 @@ export async function promptForMinimalConfig(
 }
 
 export async function runInit(cwd: string, config: any) {
-   const spinner = ora(`Initializing project...`)?.start()
+   const spinner = ora(`Initializing project in ${cwd}...`).start()
 
-   spinner?.succeed()
+   // Hier kannst du die Konfiguration verwenden, um die Initialisierung durchzuführen.
+   // Beispiel: Abhängigkeiten installieren, Verzeichnisse erstellen, etc.
+   console.log('Configuration:', config)
+
+   spinner.succeed()
 }

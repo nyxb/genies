@@ -1,8 +1,8 @@
+import path from 'node:path'
 import { cosmiconfig } from 'cosmiconfig'
 import { z } from 'zod'
 import { loadConfig } from 'tsconfig-paths'
 import { resolveImport } from '~/src/utils/resolve-import'
-import path from 'node:path'
 
 export const DEFAULT_STYLE = 'kebab-case'
 export const DEFAULT_COMPONENTS = 'components'
@@ -14,8 +14,8 @@ const explorer = cosmiconfig('genies', {
       '.genies.cjs',
       'genies.config.mjs',
       'genies.config.cjs',
-      'genies.json'
-   ]
+      'genies.json',
+   ],
 })
 
 export type RawConfig = z.infer<typeof rawConfigSchema>

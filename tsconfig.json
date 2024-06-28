@@ -1,13 +1,12 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
+    "composite": false,
     "baseUrl": ".",
+    "moduleResolution": "node",
     "paths": {
       "~/*": ["./*"]
     },
-    "isolatedModules": false,
-    "composite": false,
-    "moduleResolution": "node",
     "resolveJsonModule": true,
     "strict": true,
     "noUnusedLocals": false,
@@ -17,6 +16,7 @@
     "inlineSources": false,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
+    "isolatedModules": false,
     "preserveWatchOutput": true,
     "skipLibCheck": true
   },
