@@ -215,7 +215,6 @@ export async function promptForMinimalConfig(
 
    const configFileName = `genies.config.${configFileExtension}`
 
-   const configFileName = `genies.config.${configFileExtension}`
 
    // In Datei schreiben.
    logger.info('')
