@@ -58,8 +58,8 @@ export const add = new Command()
             process.exit(1)
          }
 
-         const baseDir = config.componentsPath.replace('~', cwd)
-         const targetDir = options.path ? path.resolve(cwd, options.path) : path.resolve(cwd, baseDir)
+         const baseDir = path.resolve(cwd, config.componentsPath)
+         const targetDir = options.path ? path.resolve(cwd, options.path) : baseDir
 
          // Check if the base directory exists
          if (!existsSync(baseDir)) {

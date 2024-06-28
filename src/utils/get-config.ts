@@ -4,7 +4,7 @@ import { loadConfig } from 'tsconfig-paths'
 import { resolveImport } from '~/src/utils/resolve-import'
 
 export const DEFAULT_STYLE = 'kebab-case'
-export const DEFAULT_COMPONENTS = '~/components'
+export const DEFAULT_COMPONENTS = 'components'
 export const styles = ['camelCase', 'kebab-case', 'snake_case', 'StartCase'] as const
 
 const explorer = cosmiconfig('genies', {
@@ -38,7 +38,8 @@ export async function getConfig(cwd: string): Promise<RawConfig & { fileExtensio
 
       const rawConfig = rawConfigSchema.parse(configResult.config)
       const fileExtension = rawConfig.fileExtension || (rawConfig.tsx ? 'tsx' : 'js')
-      return { ...rawConfig, fileExtension }
+      const componentsPath = path.resolve(cwd, rawConfig.componentsPath)
+      return { ...rawConfig, componentsPath, fileExtension }
    }
    catch (error) {
       console.error(`Invalid configuration found in ${cwd}:`, error)
