@@ -123,13 +123,30 @@ export async function promptForConfig(
       componentFileExtension = extension
    }
 
-   const config = rawConfigSchema.parse({
-      style: options.style,
-      componentsPath: options.componentsPath,
-      tsx: options.tsx,
-      aliases: options.aliases,
-      fileExtension: componentFileExtension,
-   })
+   if (!projectConfig) {
+      const { componentsPath } = await prompts({
+         type: 'text',
+         name: 'componentsPath',
+         message: `Enter the path for your components directory:`,
+         initial: DEFAULT_COMPONENTS,
+      });
+
+      config = rawConfigSchema.parse({
+         style: options.style,
+         componentsPath,
+         tsx: options.tsx,
+         aliases: options.aliases,
+         fileExtension: componentFileExtension,
+      });
+   } else {
+      config = rawConfigSchema.parse({
+         style: options.style,
+         componentsPath: options.componentsPath,
+         tsx: options.tsx,
+         aliases: options.aliases,
+         fileExtension: componentFileExtension,
+      })
+   }
 
    if (!skip) {
       const { proceed } = await prompts({
