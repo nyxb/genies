@@ -6,7 +6,7 @@ import { loadConfig } from 'tsconfig-paths'
 import { getConfig } from '~/src/utils/get-config'
 import type { RawConfig } from '~/src/utils/get-config'
 import prompts from 'prompts';
-import { rawConfigSchema, DEFAULT_COMPONENTS } from '~/src/utils/get-config';
+import { rawConfigSchema, DEFAULT_COMPONENTS, styles } from '~/src/utils/get-config';
 
 // TODO: Add support for more frameworks.
 // We'll start with Next.js for now.
@@ -73,21 +73,29 @@ export async function getProjectConfig(cwd: string): Promise<RawConfig | null> {
   const existingConfig = await getConfig(cwd);
   if (existingConfig) return existingConfig;
 
-  // Prompt the user for the components path if no config is found
-  const { componentsPath } = await prompts({
-    type: 'text',
-    name: 'componentsPath',
-    message: `Enter the path for your components directory:`,
-    initial: DEFAULT_COMPONENTS,
-  });
-
   const isTsx = await isTypeScriptProject(cwd);
+
+  const { componentsPath, aliases } = await prompts([
+    {
+      type: 'text',
+      name: 'componentsPath',
+      message: `Enter the path for your components directory:`,
+      initial: DEFAULT_COMPONENTS,
+    },
+    {
+      type: 'list',
+      name: 'aliases',
+      message: `Enter aliases for subdirectories (comma separated):`,
+      initial: '',
+      separator: ',',
+    },
+  ]);
 
   const config: RawConfig = {
     componentsPath: path.resolve(cwd, componentsPath),
     style: 'kebab-case',
     tsx: isTsx,
-    aliases: [], // Hinzufügen der Aliase zur Konfiguration
+    aliases: aliases.map(alias => alias.trim()),
   };
 
   return config;
