@@ -127,7 +127,7 @@ export async function promptForConfig(
       componentFileExtension = extension
    }
 
-   const componentsPath = options.componentsPath.replace(/^~\//, `${process.env.HOME}/`)
+   const componentsPath = path.resolve(cwd, options.componentsPath)
 
    const config = rawConfigSchema.parse({
       style: options.style,
@@ -212,9 +212,11 @@ export async function promptForMinimalConfig(
       }
    }
 
+   const componentsPath = path.resolve(cwd, defaultConfig.componentsPath)
+
    const config = rawConfigSchema.parse({
       style,
-      componentsPath: defaultConfig.componentsPath,
+      componentsPath,
       tsx,
       aliases: defaultConfig.aliases,
       fileExtension: componentFileExtension,

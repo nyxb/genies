@@ -2,6 +2,7 @@ import { cosmiconfig } from 'cosmiconfig'
 import { z } from 'zod'
 import { loadConfig } from 'tsconfig-paths'
 import { resolveImport } from '~/src/utils/resolve-import'
+import path from 'node:path'
 
 export const DEFAULT_STYLE = 'kebab-case'
 export const DEFAULT_COMPONENTS = 'components'
