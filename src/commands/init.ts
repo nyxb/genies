@@ -10,11 +10,9 @@ import { logger } from '~/src/utils/logger'
 import { handleError } from '~/src/utils/handle-error'
 import { getProjectConfig } from '~/src/utils/get-project-info'
 import {
-   getConfig,
    rawConfigSchema,
    styles,
    DEFAULT_COMPONENTS,
-   resolveConfigPaths
 } from '~/src/utils/get-config'
 import type { RawConfig } from '~/src/utils/get-config'
 
@@ -54,9 +52,7 @@ export const init = new Command()
                opts.defaults,
             )
          } else {
-            // Read config.
-            const existingConfig = await getConfig(cwd)
-            config = await promptForConfig(cwd, existingConfig, options.yes)
+            config = await promptForConfig(cwd, null, options.yes)
          }
 
          await runInit(cwd, config)
@@ -127,11 +123,9 @@ export async function promptForConfig(
       componentFileExtension = extension
    }
 
-   const componentsPath = path.resolve(cwd, options.componentsPath)
-
    const config = rawConfigSchema.parse({
       style: options.style,
-      componentsPath,
+      componentsPath: options.componentsPath,
       tsx: options.tsx,
       aliases: options.aliases,
       fileExtension: componentFileExtension,
@@ -151,7 +145,6 @@ export async function promptForConfig(
          process.exit(0)
    }
 
-   const resolvedConfig = await resolveConfigPaths(cwd, config)
    const configFileName = `genies.config.${configFileExtension}`
 
    // In Datei schreiben.
@@ -161,7 +154,7 @@ export async function promptForConfig(
    await fs.writeFile(targetPath, `export default ${JSON.stringify(config, null, 2)}`, 'utf8')
    spinner.succeed()
 
-   return resolvedConfig
+   return config
 }
 
 export async function promptForMinimalConfig(
@@ -212,18 +205,14 @@ export async function promptForMinimalConfig(
       }
    }
 
-   const componentsPath = path.resolve(cwd, defaultConfig.componentsPath)
-
    const config = rawConfigSchema.parse({
       style,
-      componentsPath,
+      componentsPath: defaultConfig.componentsPath,
       tsx,
       aliases: defaultConfig.aliases,
       fileExtension: componentFileExtension,
    })
 
-   // Bestimmen, ob TypeScript oder JavaScript verwendet wird.
-   const resolvedConfig = await resolveConfigPaths(cwd, config)
    const configFileName = `genies.config.${configFileExtension}`
 
    // In Datei schreiben.
@@ -233,7 +222,7 @@ export async function promptForMinimalConfig(
    await fs.writeFile(targetPath, `export default ${JSON.stringify(config, null, 2)}`, 'utf8')
    spinner.succeed()
 
-   return resolvedConfig
+   return config
 }
 
 export async function runInit(cwd: string, config: any) {
