@@ -6,6 +6,7 @@ import { loadConfig } from 'tsconfig-paths'
 import { getConfig } from '~/src/utils/get-config'
 import type { RawConfig } from '~/src/utils/get-config'
 import prompts from 'prompts';
+import { rawConfigSchema, DEFAULT_COMPONENTS } from '~/src/utils/get-config';
 
 // TODO: Add support for more frameworks.
 // We'll start with Next.js for now.
