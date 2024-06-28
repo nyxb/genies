@@ -27,24 +27,24 @@ const PROJECT_SHARED_IGNORE = [
    'build',
 ]
 
-export async function getProjectInfo() {
+export async function getProjectInfo(cwd: string) {
    const info = {
       tsconfig: null,
       srcDir: false,
       appDir: false,
-      componentsDir: false,
+      isTsx: null,
    }
 
    try {
-      const tsconfig = await getTsConfig()
+      const tsconfig = await getTsConfig(cwd)
 
       return {
          tsconfig,
-         srcDir: existsSync(path.resolve('./src')),
+         srcDir: existsSync(path.resolve(cwd, 'src')),
          appDir:
-            existsSync(path.resolve('./app')) ||
-            existsSync(path.resolve('./src/app')),
-         componentsDir: existsSync(path.resolve('./components')),
+            existsSync(path.resolve(cwd, 'app')) ||
+            existsSync(path.resolve(cwd, 'src/app')),
+         isTsx: tsconfig !== null,
       }
    }
    catch (error) {
@@ -52,9 +52,9 @@ export async function getProjectInfo() {
    }
 }
 
-export async function getTsConfig() {
+export async function getTsConfig(cwd: string) {
    try {
-      const tsconfigPath = path.join('tsconfig.json')
+      const tsconfigPath = path.join(cwd, 'tsconfig.json')
       const tsconfig = await fs.readJSON(tsconfigPath)
 
       if (!tsconfig)
@@ -69,46 +69,43 @@ export async function getTsConfig() {
 }
 
 export async function getProjectConfig(cwd: string): Promise<RawConfig | null> {
-  // Check for existing component config.
-  const existingConfig = await getConfig(cwd);
-  if (existingConfig) return existingConfig;
+   // Check for existing component config.
+   const existingConfig = await getConfig(cwd);
+   if (existingConfig) return existingConfig;
 
-  const isTsx = await isTypeScriptProject(cwd);
-  const projectType = await getProjectType(cwd);
-  const tsConfigAliasPrefix = await getTsConfigAliasPrefix(cwd);
+   const projectInfo = await getProjectInfo(cwd);
+   const { isTsx } = projectInfo;
 
-  if (!projectType || !tsConfigAliasPrefix) {
-    // Prompt the user for the components path if no config is found
-    const { componentsPath, aliases } = await prompts([
-      {
-        type: 'text',
-        name: 'componentsPath',
-        message: `Enter the path for your components directory:`,
-        initial: DEFAULT_COMPONENTS,
-      },
-      {
-        type: 'list',
-        name: 'aliases',
-        message: `Enter aliases for subdirectories (comma separated):`,
-        initial: '',
-        separator: ',',
-      },
-    ]);
+   const { componentsPath, aliases, useTsx } = await prompts([
+     {
+       type: 'text',
+       name: 'componentsPath',
+       message: `Enter the path for your components directory:`,
+       initial: DEFAULT_COMPONENTS,
+     },
+     {
+       type: 'list',
+       name: 'aliases',
+       message: `Enter aliases for subdirectories (comma separated):`,
+       initial: '',
+       separator: ',',
+     },
+     {
+       type: 'confirm',
+       name: 'useTsx',
+       message: `Are you using TypeScript?`,
+       initial: isTsx !== null ? isTsx : true,
+     },
+   ]);
 
-    const config: RawConfig = {
-      componentsPath: path.resolve(cwd, componentsPath),
-      style: 'kebab-case',
-      tsx: isTsx,
-      aliases: aliases.map(alias => alias.trim()),
-    };
+   const config: RawConfig = {
+     componentsPath: path.resolve(cwd, componentsPath),
+     style: 'kebab-case',
+     tsx: useTsx,
+     aliases: aliases.map(alias => alias.trim()),
+   };
 
-    return config;
-  }
-
-  // Weitere Konfiguration basierend auf dem erkannten Projekttyp und Aliassen
-  // ...
-
-  return null;
+   return config;
 }
 
 export async function getProjectType(cwd: string): Promise<ProjectType | null> {
@@ -146,14 +143,4 @@ export async function getTsConfigAliasPrefix(cwd: string) {
    }
 
    return null
-}
-
-export async function isTypeScriptProject(cwd: string) {
-   try {
-      const tsconfig = await getTsConfig();
-      return tsconfig !== null;
-   }
-   catch (error) {
-      return false;
-   }
 }
