@@ -74,31 +74,41 @@ export async function getProjectConfig(cwd: string): Promise<RawConfig | null> {
   if (existingConfig) return existingConfig;
 
   const isTsx = await isTypeScriptProject(cwd);
+  const projectType = await getProjectType(cwd);
+  const tsConfigAliasPrefix = await getTsConfigAliasPrefix(cwd);
 
-  const { componentsPath, aliases } = await prompts([
-    {
-      type: 'text',
-      name: 'componentsPath',
-      message: `Enter the path for your components directory:`,
-      initial: DEFAULT_COMPONENTS,
-    },
-    {
-      type: 'list',
-      name: 'aliases',
-      message: `Enter aliases for subdirectories (comma separated):`,
-      initial: '',
-      separator: ',',
-    },
-  ]);
+  if (!projectType || !tsConfigAliasPrefix) {
+    // Prompt the user for the components path if no config is found
+    const { componentsPath, aliases } = await prompts([
+      {
+        type: 'text',
+        name: 'componentsPath',
+        message: `Enter the path for your components directory:`,
+        initial: DEFAULT_COMPONENTS,
+      },
+      {
+        type: 'list',
+        name: 'aliases',
+        message: `Enter aliases for subdirectories (comma separated):`,
+        initial: '',
+        separator: ',',
+      },
+    ]);
 
-  const config: RawConfig = {
-    componentsPath: path.resolve(cwd, componentsPath),
-    style: 'kebab-case',
-    tsx: isTsx,
-    aliases: aliases.map(alias => alias.trim()),
-  };
+    const config: RawConfig = {
+      componentsPath: path.resolve(cwd, componentsPath),
+      style: 'kebab-case',
+      tsx: isTsx,
+      aliases: aliases.map(alias => alias.trim()),
+    };
 
-  return config;
+    return config;
+  }
+
+  // Weitere Konfiguration basierend auf dem erkannten Projekttyp und Aliassen
+  // ...
+
+  return null;
 }
 
 export async function getProjectType(cwd: string): Promise<ProjectType | null> {
@@ -139,6 +149,11 @@ export async function getTsConfigAliasPrefix(cwd: string) {
 }
 
 export async function isTypeScriptProject(cwd: string) {
-   // Check if cwd has a tsconfig.json file.
-   return pathExists(path.resolve(cwd, 'tsconfig.json'))
+   try {
+      const tsconfig = await getTsConfig();
+      return tsconfig !== null;
+   }
+   catch (error) {
+      return false;
+   }
 }
