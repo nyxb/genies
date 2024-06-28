@@ -127,9 +127,11 @@ export async function promptForConfig(
       componentFileExtension = extension
    }
 
+   const componentsPath = options.componentsPath.replace(/^~\//, `${process.env.HOME}/`)
+
    const config = rawConfigSchema.parse({
       style: options.style,
-      componentsPath: options.componentsPath,
+      componentsPath,
       tsx: options.tsx,
       aliases: options.aliases,
       fileExtension: componentFileExtension,
