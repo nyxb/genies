@@ -36,7 +36,8 @@ export async function getProjectInfo(cwd: string) {
    }
 
    try {
-      const tsconfig = await getTsConfig(cwd)
+      const tsconfig = await getTsConfig(cwd);
+      const hasTsconfig = tsconfig !== null;
 
       return {
          tsconfig,
@@ -44,10 +45,11 @@ export async function getProjectInfo(cwd: string) {
          appDir:
             existsSync(path.resolve(cwd, 'app')) ||
             existsSync(path.resolve(cwd, 'src/app')),
-         isTsx: tsconfig !== null,
+         isTsx: hasTsconfig,
       }
    }
    catch (error) {
+      console.error('Error getting project info:', error);
       return info
    }
 }
@@ -149,14 +151,3 @@ export async function isTypeScriptProject(cwd: string) {
    // Check if cwd has a tsconfig.json file.
    return pathExists(path.resolve(cwd, 'tsconfig.json'))
 }
-
-export async function preFlight(cwd: string) {
-   // We need Tailwind CSS to be configured.
-   const tailwindConfig = await fg.glob('tailwind.config.*', {
-      cwd,
-      deep: 3,
-      ignore: PROJECT_SHARED_IGNORE,
-   })
-
-   if (!tailwindConfig.length) {
-      throw new Error(
