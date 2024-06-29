@@ -58,7 +58,7 @@ export const add = new Command()
             process.exit(1)
          }
 
-         const baseDir = path.resolve(cwd, config.componentsPath)
+         const baseDir = path.resolve(cwd, config.components)
          const targetDir = options.path ? path.resolve(cwd, options.path) : baseDir
 
          // Check if the base directory exists

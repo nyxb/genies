@@ -22,7 +22,7 @@ export type RawConfig = z.infer<typeof rawConfigSchema>
 
 export const rawConfigSchema = z
    .object({
-      componentsPath: z.string().default(DEFAULT_COMPONENTS),
+      components: z.string().default(DEFAULT_COMPONENTS),
       style: z.enum(styles).default(DEFAULT_STYLE),
       tsx: z.boolean().default(true),
       aliases: z.array(z.string()).optional(), // New property for aliases
@@ -39,8 +39,8 @@ export async function getConfig(cwd: string): Promise<RawConfig & { fileExtensio
 
       const rawConfig = rawConfigSchema.parse(configResult.config)
       const fileExtension = rawConfig.fileExtension || (rawConfig.tsx ? 'tsx' : 'js')
-      const componentsPath = path.resolve(cwd, rawConfig.componentsPath)
-      return { ...rawConfig, componentsPath, fileExtension }
+      const components = path.resolve(cwd, rawConfig.components)
+      return { ...rawConfig, components, fileExtension }
    }
    catch (error) {
       console.error(`Invalid configuration found in ${cwd}:`, error)
@@ -61,7 +61,7 @@ export async function resolveConfigPaths(cwd: string, config: RawConfig) {
    }
 
    const resolvedPaths = {
-      components: await resolveImport(config.componentsPath, tsConfig),
+      components: await resolveImport(config.components, tsConfig),
    }
 
    return {

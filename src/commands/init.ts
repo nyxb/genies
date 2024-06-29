@@ -90,9 +90,9 @@ export async function promptForConfig(
       },
       {
          type: 'text',
-         name: 'componentsPath',
+         name: 'components',
          message: `Configure the import alias for ${highlight('components')}:`,
-         initial: defaultConfig?.componentsPath ?? DEFAULT_COMPONENTS,
+         initial: defaultConfig?.components ?? '~/components',
       },
       {
          type: 'list',
@@ -121,7 +121,7 @@ export async function promptForConfig(
 
    const config = rawConfigSchema.parse({
       style: options.style,
-      componentsPath: options.componentsPath,
+      components: options.components,
       tsx: defaultConfig?.tsx ?? true,
       aliases: options.aliases,
       fileExtension: componentFileExtension,
@@ -196,7 +196,7 @@ export async function promptForMinimalConfig(
 
    const config = rawConfigSchema.parse({
       style,
-      componentsPath: defaultConfig.componentsPath,
+      components: defaultConfig.components,
       tsx,
       aliases: defaultConfig.aliases,
       fileExtension: componentFileExtension,

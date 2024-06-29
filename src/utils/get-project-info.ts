@@ -78,10 +78,10 @@ export async function getProjectConfig(cwd: string): Promise<RawConfig | null> {
    const projectInfo = await getProjectInfo(cwd)
    const { isTsx } = projectInfo
 
-   const { componentsPath, aliases } = await prompts([
+   const { components, aliases } = await prompts([
       {
          type: 'text',
-         name: 'componentsPath',
+         name: 'components',
          message: `Enter the path for your components directory:`,
          initial: DEFAULT_COMPONENTS,
       },
@@ -95,7 +95,7 @@ export async function getProjectConfig(cwd: string): Promise<RawConfig | null> {
    ])
 
    const config: RawConfig = {
-      componentsPath: path.resolve(cwd, componentsPath),
+      components: path.resolve(cwd, components),
       style: 'kebab-case',
       tsx: isTsx ?? false,
       aliases: aliases.map((alias: string) => alias.trim() as string),
