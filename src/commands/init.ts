@@ -196,7 +196,7 @@ export async function promptForMinimalConfig(
 
    const config = rawConfigSchema.parse({
       style,
-      components: defaultConfig.components,
+      components: '~/components',
       tsx,
       aliases: defaultConfig.aliases,
       fileExtension: componentFileExtension,
