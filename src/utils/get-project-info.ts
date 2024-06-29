@@ -78,7 +78,7 @@ export async function getProjectConfig(cwd: string): Promise<RawConfig | null> {
    const projectInfo = await getProjectInfo(cwd)
    const { isTsx } = projectInfo
 
-   const { componentsPath, aliases, useTsx } = await prompts([
+   const { componentsPath, aliases } = await prompts([
       {
          type: 'text',
          name: 'componentsPath',
@@ -92,19 +92,13 @@ export async function getProjectConfig(cwd: string): Promise<RawConfig | null> {
          initial: '',
          separator: ',',
       },
-      {
-         type: 'confirm',
-         name: 'useTsx',
-         message: `Are you using TypeScript?`,
-         initial: isTsx !== null ? isTsx : true,
-      },
    ])
 
    const config: RawConfig = {
       componentsPath: path.resolve(cwd, componentsPath),
       style: 'kebab-case',
-      tsx: useTsx,
-      aliases: aliases.map(alias => alias.trim()),
+      tsx: isTsx ?? false,
+      aliases: aliases.map((alias: string) => alias.trim() as string),
    }
 
    return config

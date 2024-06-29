@@ -101,17 +101,11 @@ export async function promptForConfig(
          initial: defaultConfig?.aliases?.join(', ') ?? '',
          separator: ',',
       },
-      {
-         type: 'confirm',
-         name: 'tsx',
-         message: `Are you using TypeScript?`,
-         initial: true,
-      },
    ])
 
    let configFileExtension = 'mjs'
    let componentFileExtension = 'tsx'
-   if (!options.tsx) {
+   if (!defaultConfig?.tsx) {
       const { extension } = await prompts({
          type: 'select',
          name: 'extension',
@@ -128,7 +122,7 @@ export async function promptForConfig(
    const config = rawConfigSchema.parse({
       style: options.style,
       componentsPath: options.componentsPath,
-      tsx: options.tsx,
+      tsx: defaultConfig?.tsx ?? true,
       aliases: options.aliases,
       fileExtension: componentFileExtension,
    })
@@ -166,7 +160,7 @@ export async function promptForMinimalConfig(
 ) {
    const highlight = (text: string) => chalk.cyan(text)
    let style = defaultConfig.style
-   let tsx = defaultConfig.tsx
+   const tsx = defaultConfig.tsx
    let configFileExtension = 'mjs'
    let componentFileExtension = 'tsx'
 
@@ -181,16 +175,9 @@ export async function promptForMinimalConfig(
                value: style,
             })),
          },
-         {
-            type: 'confirm',
-            name: 'tsx',
-            message: `Are you using TypeScript?`,
-            initial: true,
-         },
       ])
 
       style = options.style
-      tsx = options.tsx
 
       if (!tsx) {
          const { extension } = await prompts({
