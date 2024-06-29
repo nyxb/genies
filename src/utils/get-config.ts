@@ -39,8 +39,7 @@ export async function getConfig(cwd: string): Promise<RawConfig & { fileExtensio
 
       const rawConfig = rawConfigSchema.parse(configResult.config)
       const fileExtension = rawConfig.fileExtension || (rawConfig.tsx ? 'tsx' : 'js')
-      const components = path.resolve(cwd, rawConfig.components)
-      return { ...rawConfig, components, fileExtension }
+      return { ...rawConfig, fileExtension }
    }
    catch (error) {
       console.error(`Invalid configuration found in ${cwd}:`, error)

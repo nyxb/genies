@@ -51,14 +51,18 @@ export const add = new Command()
          const config = await getConfig(cwd)
          if (!config) {
             logger.warn(
-          `Configuration is missing. Please run ${chalk.green(
-            `init`,
-          )} to create a genies config file.`,
+               `Configuration is missing. Please run ${chalk.green(
+                  `init`,
+               )} to create a genies config file.`,
             )
             process.exit(1)
          }
 
-         const baseDir = path.resolve(cwd, config.components)
+         // Resolve the components path
+         const baseDir = config.components.startsWith('~')
+            ? path.join(cwd, config.components.slice(1))
+            : path.resolve(cwd, config.components)
+
          const targetDir = options.path ? path.resolve(cwd, options.path) : baseDir
 
          // Check if the base directory exists
