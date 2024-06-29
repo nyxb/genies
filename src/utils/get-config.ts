@@ -5,7 +5,7 @@ import { loadConfig } from 'tsconfig-paths'
 import { resolveImport } from '~/src/utils/resolve-import'
 
 export const DEFAULT_STYLE = 'kebab-case'
-export const DEFAULT_COMPONENTS = 'components'
+export const DEFAULT_COMPONENTS = '~/components'
 export const styles = ['camelCase', 'kebab-case', 'snake_case', 'StartCase'] as const
 
 const explorer = cosmiconfig('genies', {
